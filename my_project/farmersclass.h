@@ -8,6 +8,7 @@
 #include <numeric>
 #include "agriculture_types.h"
 #include "payment_types.h"
+#include "login.h"
 #include <functional>
 using json=nlohmann::json;
 
@@ -63,7 +64,8 @@ class Farmers:public Base{
 		        std::string location;
 			std::string dealer_id;
 		        int age;
-			std::vector<FarmerPayment> paymentHistory;                   
+			std::vector<FarmerPayment> paymentHistory;
+			std::vector<Login> login;
 			json toJson() const{
                                 json e;
                                 e["Id"] = id;
@@ -84,8 +86,11 @@ class Farmers:public Base{
 			                paymentsArray.push_back(payment.toJson());
 				}
 				e["PaymentHistory"] = paymentsArray;
-
-                
+				json loginArray = json::Array();
+				for(const auto& pass : login){
+					loginArray.push_back(pass.tojson());
+				}
+				e["Account"] = loginArray;
                                 e["Produce"] = produceArray;
                                 e["My_Dealers_Id"] = dealer_id;
                                 e["Overall_Total"] = totalproduce;
@@ -124,6 +129,14 @@ class Farmers:public Base{
 						paymentHistory.push_back(payment);
                                         }
 				}
+				login.clear();
+				if(j.contains("Account") && j["Account"].is_array(){
+						for(const auto& pass : j["Account"]){
+						        Login account;
+							account.fromJson(pass);
+							login.push_back(account);
+						}
+				}
                         } catch (const json::exception& e) {
                                 std::cerr << "JSON parsing error in fromJson: " << e.what() << "\n";
                                 
@@ -142,6 +155,7 @@ class Farmers:public Base{
 		void deleteFarmersDetails(const std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction);
 		void addFarmProduce(const std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction);
 		json toJsonFarmers(const std::vector<std::shared_ptr<Farmer>>& farmers) const;
+		void LogIn(const std::vector<std::shared_ptr<Farmer>>()>& readFunction);
 		friend class Dealers;
 
 };

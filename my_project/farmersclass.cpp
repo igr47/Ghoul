@@ -2,6 +2,9 @@
 #include "dealersclass.h"
 #include "uuid.h"
 #include "shared_utils.h"
+#include "passwordhashing.h"
+#include <sodium.h>
+#include "lagin.h"
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -397,4 +400,73 @@ void Farmers::addFarmProduce(const std::function<std::vector<std::shared_ptr<Far
     
     std::cout << "\nAll produce data successfully saved!\n";
 }
+void Farmers::LogIn(const std::vector<std::shared_ptr<Farmer>>()>& readFunction){
+	try{
+		if(sodium_init()<0){
+			std::cerr<<"\nLibsodium init failed!";
+			return 1;
+		}
+		auto farmers = readFunction();
+		std::vector<Login> currentAccount = farmers->login;
+		if(currentAccount.empty()){
+			char opt;
+			std::cout<<"\nSign up to continue? (y/n) ";
+			if(tolowwer=="n"){
+				break;
+			}else{
+				std::vector<std::string> newaccount;
+				std::string username;
+				std::string password;
+				std::string email;
+				std::string password2;
+				std::cout<<"\nEnter your username: ";
+				std::getline(std::cin, username);
+				std::cout<<"\nPassword: ";
+				std::getline(std::cin, password);
+				std::string hashed_password=argon2_hash(password);
+				std::cout<<"\NConfirm password: ";
+				std::getline(std::cin, password2);
+				if(verify_password(hashed_password,password2)){
+					std::cout<<"\nPassword created!";
+				}else{
+					std::cout<<"\nThe first password must match the confirmation message!";
+				}
+				std::cout<<"\nEmail: ";
+				std::getline(std::cin, email);
+				newaccount.push_back(username);
+                                newaccount.push_back(email);
+                                newaccount.push_back(hashed_password);
+				farmers->currentAccount.push_back(newaccount);
+			}
+		}else{
+			std::string username;
+			std::string password;
+			std::string email;
+			std::cout<<"\nUsername: ";
+			std::getline(std::cin,username);
+			std::cout<<"\nPassword: ";
+			std::getline(std::cin, password);
+			if(!verify_password(hashed_password,password){
+					std::cout<<"\nWrong password!!!";
+			std::cout<<"\nEmail: ';
+			std::getline(std::cin, email);
+			auto userIt=std::find_if(currentAccount.begin(),currentAccount.end(),[&username](const Login& l){
+					return l->my_name==username;
+				});
+			auto passIt=std::find_if(currentAccount.begin(),currentAcoount.end(),[&password](const Login& l){
+					return l->password==password;
+				});
+			auto emailIt=std::find(currentAccount.begin(),currentAccount.end(),[&email](const Login& l){
+					return l->email==email;
+				});
+		}
+	} catch(const std::exception& e){
+	                std::cerr<<"Error signing in: "<<e.what()<<"\n";
+	}
+}
+	
 
+
+
+
+		
