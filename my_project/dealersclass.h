@@ -2,6 +2,7 @@
 #define DEALERS_CLASS
 #include "farmersclass.h"
 #include "payment_types.h"
+#include "login.h"
 #include <iostream>
 #include <string>
 #include <nlohmann/json.hpp>
@@ -144,6 +145,7 @@ class Dealers:public Farmers{
 			std::vector<PaymentRate> paymentRates;
                         std::vector<PaymentRecord> paymentRecords;
                         double totalPayments = 0.0;
+			std::vector<Login> login;
 
                         void addPaymentRecord(const PaymentRecord& record) {
                                 paymentRecords.push_back(record);
@@ -184,6 +186,11 @@ class Dealers:public Farmers{
                                 j["PaymentRecords"] = recordsArray;
 
                                 j["TotalPayments"] = totalPayments;
+				json loginArray = json::Array();
+				for(const auto& pass : login){
+					loginArray.push_back(pass.tojson());
+				}
+                                e["Account"] = loginArray;
 				return j;
 			}
 			void fromJson(const json& j) {
@@ -225,7 +232,16 @@ class Dealers:public Farmers{
                                         for (const auto& item : j["PaymentRecords"]) {
                                                 PaymentRecord record;
 						record.fromJson(item);
-						paymentRecords.push_back(record);                            }
+						paymentRecords.push_back(record);                            
+					}
+                                }
+				login.clear();
+                                if(j.contains("Account") && j["Account"].is_array(){
+                                        for(const auto& pass : j["Account"]){
+                                                Login account;
+                                                account.fromJson(pass);
+                                                login.push_back(account);
+                                        }
                                 }
 
                                 totalPayments = j.value("TotalPayments", 0.0);
@@ -251,6 +267,7 @@ class Dealers:public Farmers{
 		void searchFarmers(const std::function<std::vector<Farmers::Farmer>()>& readFuction);
 		void processFarmersPayments(const std::function<std::vector<std::shared_ptr<Farmers::Farmer>>()>& readFarmers, const std::function<std::vector<std::shared_ptr<Dealer>>()>& readDealers);
 		std::string getCurrentTimestamp();
+		void LogIn(const std::vector<std::shared_ptr<Dealer>>()>& readFunction);
 };
 #endif
 
