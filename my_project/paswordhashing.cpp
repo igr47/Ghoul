@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <sodium.h>
-#include "passwordhashing.h"
+#include "paswordhashing.h"
 
 std::string argon2_hash(const std::string &password) {
     char hashed_password[crypto_pwhash_STRBYTES];

@@ -6,23 +6,23 @@
 #include <nlohmann/json.hpp>
 using json=nlohmann::json;
 
-struct Login{
-	std::string password;
-	std::string my_name;
+struct UserCredentials{
+	std::string hashed_password;
+	std::string username;
 	std::string email;
 
 	json toJson() const{
 		return{
-			{"Password", password},
+			{"Password", hashed_password},
 			{"Email" , email},
-			{"My_Name" ,my_name}
+			{"My_Name" ,username}
 		};
 	}
 
 	void fromJson(const json& j){
-		password=j.value("Password","");
-		email=j.value("Email,"");
-		my_name=j.value("My_Name","");
+		hashed_password=j.value("Password","");
+		email=j.value("Email","");
+		username=j.value("My_Name","");
 	}
 };
 #endif

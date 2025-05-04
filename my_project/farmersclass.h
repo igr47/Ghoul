@@ -65,7 +65,7 @@ class Farmers:public Base{
 			std::string dealer_id;
 		        int age;
 			std::vector<FarmerPayment> paymentHistory;
-			std::vector<Login> login;
+			std::vector<std::shared_ptr<UserCredentials>> user;
 			json toJson() const{
                                 json e;
                                 e["Id"] = id;
@@ -86,9 +86,9 @@ class Farmers:public Base{
 			                paymentsArray.push_back(payment.toJson());
 				}
 				e["PaymentHistory"] = paymentsArray;
-				json loginArray = json::Array();
-				for(const auto& pass : login){
-					loginArray.push_back(pass.tojson());
+				json loginArray = json::array();
+				for(const auto& pass : user){
+					loginArray.push_back(pass->toJson());
 				}
 				e["Account"] = loginArray;
                                 e["Produce"] = produceArray;
@@ -129,12 +129,12 @@ class Farmers:public Base{
 						paymentHistory.push_back(payment);
                                         }
 				}
-				login.clear();
-				if(j.contains("Account") && j["Account"].is_array(){
+				user.clear();
+				if(j.contains("Account") && j["Account"].is_array()){
 						for(const auto& pass : j["Account"]){
-						        Login account;
+						        UserCredentials account;
 							account.fromJson(pass);
-							login.push_back(account);
+							user.push_back(account);
 						}
 				}
                         } catch (const json::exception& e) {
@@ -155,7 +155,12 @@ class Farmers:public Base{
 		void deleteFarmersDetails(const std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction);
 		void addFarmProduce(const std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction);
 		json toJsonFarmers(const std::vector<std::shared_ptr<Farmer>>& farmers) const;
-		void LogIn(const std::vector<std::shared_ptr<Farmer>>()>& readFunction);
+		bool registerUser(const std::string& username,const std::string& email,const std::string& password,const std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction);
+                bool loginUser(const std::string& username_or_email,const std::string& password,const std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction);
+		void displayMenu();
+		void registerUser();
+		void loginUser();
+                void LogIn();
 		friend class Dealers;
 
 };

@@ -145,7 +145,7 @@ class Dealers:public Farmers{
 			std::vector<PaymentRate> paymentRates;
                         std::vector<PaymentRecord> paymentRecords;
                         double totalPayments = 0.0;
-			std::vector<Login> login;
+			std::vector<std::shared_ptr<UserCredentials>> user;
 
                         void addPaymentRecord(const PaymentRecord& record) {
                                 paymentRecords.push_back(record);
@@ -161,7 +161,7 @@ class Dealers:public Farmers{
 				j["Location"]=location;
 				j["Yaer Of Birth"]=age;
 				j["PhoneNumber"]=phonenumber;
-				//serialize the inventory
+				//i serialize the inventory
 				json inventoryArray=json::array();
 				for(const auto& item : inventory){
 					inventoryArray.push_back(item.toJson());
@@ -186,11 +186,11 @@ class Dealers:public Farmers{
                                 j["PaymentRecords"] = recordsArray;
 
                                 j["TotalPayments"] = totalPayments;
-				json loginArray = json::Array();
-				for(const auto& pass : login){
-					loginArray.push_back(pass.tojson());
+				json loginArray = json::array();
+				for(const auto& pass : user){
+					loginArray.push_back(pass->toJson());
 				}
-                                e["Account"] = loginArray;
+                                j["Account"] = loginArray;
 				return j;
 			}
 			void fromJson(const json& j) {
@@ -235,12 +235,12 @@ class Dealers:public Farmers{
 						paymentRecords.push_back(record);                            
 					}
                                 }
-				login.clear();
-                                if(j.contains("Account") && j["Account"].is_array(){
+				user.clear();
+                                if(j.contains("Account") && j["Account"].is_array()){
                                         for(const auto& pass : j["Account"]){
-                                                Login account;
+                                                UserCredentials account;
                                                 account.fromJson(pass);
-                                                login.push_back(account);
+                                                user.push_back(account);
                                         }
                                 }
 
@@ -267,7 +267,12 @@ class Dealers:public Farmers{
 		void searchFarmers(const std::function<std::vector<Farmers::Farmer>()>& readFuction);
 		void processFarmersPayments(const std::function<std::vector<std::shared_ptr<Farmers::Farmer>>()>& readFarmers, const std::function<std::vector<std::shared_ptr<Dealer>>()>& readDealers);
 		std::string getCurrentTimestamp();
-		void LogIn(const std::vector<std::shared_ptr<Dealer>>()>& readFunction);
+		bool registerUser(const std::string& username,const std::string& email,const std::string& password,const std::function<std::vector<std::shared_ptr<Dealer>>()>& readFunction);
+		bool loginUser(const std::string& username_or_email,const std::string& password,const std::function<std::vector<std::shared_ptr<Dealer>>()>& readFunction);
+		void displayMenu();
+		void registerUser();
+		void loginUser();
+		void LogIn();
 };
 #endif
 

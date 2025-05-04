@@ -1,7 +1,7 @@
 #include "farmersclass.h"
 #include "uuid.h"
 #include "dealersclass.h"
-#include "passwordhashing.h"
+#include "paswordhashing.h"
 #include <sodium.h>
 #include "shared_utils.h"
 #include "payment_types.h"
@@ -736,67 +736,92 @@ void Dealers::processFarmersPayments(const std::function<std::vector<std::shared
         std::cerr << "Error: " << e.what() << "\n";
     }
 }
-void Farmers::LogIn(const std::vector<std::shared_ptr<Dealer>>()>& readFunction){
-        try{ 
-		if(sodium_init()<0){
-                        std::cerr<<"\nLibsodium init failed!";
-			return 1;
-                }
-		auto dealers = readFunction();
-                std::vector<Login> currentAccount = dealers->login;
-                if(currentAccount.empty()){
-			char opt;
-			std::cout<<"\nSign up to continue? (y/n) ";
-			if(tolowwer=="n"){
-                                break; 
-			}else{
-                                std::vector<std::string> newaccount;
-				std::string username;
-                                std::string password;
-				std::string email;                                          
-				std::string password2;
-				std::cout<<"\nEnter your username: ";
-                                std::getline(std::cin, username);                               
-				std::cout<<"\nPassword: ";
-				std::getline(std::cin, password);
-				std::string hashed_password=argon2_hash(password);
-                                std::cout<<"\NConfirm password: ";
-                                std::getline(std::cin, password2);
-                                if(verify_password(hashed_password,password2)){ 
-					std::cout<<"\nPassword created!";
-                                }else{
-                                        std::cout<<"\nThe first password must match the confirmation message!";
-                                }
-                                std::cout<<"\nEmail: ";
-                                std::getline(std::cin, email);
-                                newaccount.push_back(username);
-                                newaccount.push_back(email);
-                                newaccount.push_back(hashed_password);
-                                farmers->currentAccount.push_back(newaccount);
-                        }
-                }else{
-                        std::string username;
-                        std::string password;
-                        std::string email;
-                        std::cout<<"\nUsername: ";
-                        std::getline(std::cin,username);
-                        std::cout<<"\nPassword: ";
-                        std::getline(std::cin, password);
-			if(!verify_password(hashed_password,password){
-                                std::cout<<"\nWrong password!!!";
-                        std::cout<<"\nEmail: ';
-                        std::getline(std::cin, email);
-                        auto userIt=std::find_if(currentAccount.begin(),currentAccount.end(),[&username](const Login& l){
-                                        return l->my_name==username;
-                                });
-                        auto passIt=std::find_if(currentAccount.begin(),currentAcoount.end(),[&password](const Login& l){
-                                        return l->password==password;                                                                                             }); 
-			auto emailIt=std::find(currentAccount.begin(),currentAccount.end(),[&email](const Login& l){
-                                        return l->email==email; 
-				});
-                } 
-	} catch(const std::exception& e){
-                        std::cerr<<"Error signing in: "<<e.what()<<"\n";
-        }
+bool Dealers::registerUser(const std::string& username,const std::string& email,const std::string& password,const std::function<std::vector<std::shared_ptr<Dealer>>()>& readFunction){
+	auto dealers=readFunction();
+	for(const auto& dealer : dealers){
+	        if(std::any_of(dealer->user.begin(),dealer->user.end(),[&username,&email](const auto& u){
+				        return u->username==username || u->email==email;
+					})){
+			return false;
+			std::string hashed_pw=argon2_hash(password);
+			if(hashed_pw.empty()){
+				return false;
+			}
+			auto new_user=std::make_shared<UserCredentials>();
+			new_user->username=username;
+			new_user->email=email;
+			new_user->hashed_password=hashed_pw;
+			dealer->user.push_back(new_user);
+			json dealersJson=toJsonDealers(dealers);
+			writeToFile("dealers.json",dealersJson);
+		}
+	}
 }
+bool Dealers::loginUser(const std::string& username_or_email,const std::string& password,const std::function<std::vector<std::shared_ptr<Dealer>>()>& readFunction){
+	 auto dealers=readFunction();
+	 for(const auto& item : dealers){
+		 auto userIt=std::find_if(item->user.begin(),item->user.end(),[&username_or_email](const auto& u){
+				 return u->username==username_or_email || u->email==username_or_email;
+				});
+		 if(userIt==item->user.end()){
+			 return false;
+		}
+		return verify_password((*userIt)->hashed_password,password);
+	}
+}
+void Dealers::displayMenu(){
+	std::cout<<"\n=======Aunthentication System=========="
+		<<"\n1.Register:"
+		<<"\n2.Login:"
+		<<"\n3.Exit:"
+		<<"\nChoise";
+}
+void Dealers::registerUser(){
+	std::string username,password,email;
+	std::cout<<"\n=======Registration=======";
+	std::cout<<"\nUsername: ";
+	std::getline(std::cin,username);
+	std::cout<<"\nEmail: ";
+	std::getline(std::cin,email);
+	std::cout<<"\nPassword: ";
+	std::getline(std::cin,password);
+	if(registerUser(username,email,password,readFromFile)){
+		std::cout<<"Registration successfull.\n";
+	}else{
+		std::cout<<"\nRegistration failed(username or email alredy exists)";
+	}
+}
+void Dealers::loginUser(){
+	std::string username_or_email,password;
+	std::cout<<"\n======LogIn=======";
+	std::cout<<"\nUsername or Email: ";
+	std::getline(std::cin,username_or_email);
+	std::cout<<"\nPassword: ";
+	std::getline(std::cin,password);
+	if(loginUser(username_or_email,password,readFromFile)){
+		std::cout<<"\nLogin successfull.";
+	}else{
+		std::cout<<"\nInvalid credentials!!!!!";
+	}
+}
+void Dealers::LogIn(){
+	int opt;
+	displayMenu();
+	std::cin>>opt;
+	switch(opt){
+		case 1:
+			registerUser();
+			break;
+		case 2:
+			loginUser();
+			break;
+		case 3:
+			break;
+		default:
+			std::cout<<"\nPlease enter valid option.";
+			break;
+	}
+}
+
+
 

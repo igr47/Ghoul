@@ -38,7 +38,6 @@ int main() {
                 std::cin.ignore();
 
                 if (option2 == 1) {
-		    f.LogIn(Farmers::raedFromFile);
                     int option;
                     do {
                         // Farmer admin menu
@@ -84,7 +83,6 @@ int main() {
                         }
                     } while (option != 6);
                 } else if(option2==2){
-		    f.LogIn(Farmers::raedFromFile);
                     f.addFarmProduce(Farmers::readFromFile);
                 }
             } while (option2 != 2);
@@ -102,7 +100,6 @@ int main() {
                 std::cin.ignore();
 
                 if (optiondealer == 1) {
-		    d.LogIn(Dealers::readFromFile);
                     int processchoice;
                     do {
                         // Dealer admin menu
@@ -148,7 +145,6 @@ int main() {
                         }
                     } while (processchoice != 6);
                 } else if(optiondealer==2){
-		    d.LogIn(Dealers::readFromFile);
                     int processchoise_2;
                     do{
                         // Dealer operations menu

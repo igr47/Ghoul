@@ -414,18 +414,19 @@ bool Farmers::registerUser(const std::string& username,const std::string& email,
 			auto new_user=std::make_shared<UserCredentials>();    
 			new_user->username=username;
                         new_user->email=email;
-                        new_user->hashed_password=hashed_pw;
+                        new_user->hashed_password=hasshed_pw;
 			farmer->user.push_back(new_user);                                
-			json farmersJson=toJsonFarmers(farmers);
+			json farmersJson=toJsonFarmers(farmer);
                         writeToFile("farmers.json",farmersJson);
                 }
 	}
 }
-bool Farmers::loginUser(const std::string& username_or_email,const std::string& password,const std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction){
+bool Farmers::loginUser(const std::string& username_or_email,const std::string& password,const std::function<std::vector<std::shar
+ed_ptr<Farmer>>()>& readFunction){
          auto farmers=readFunction();
          for(const auto& item : farmers){
                  auto userIt=std::find_if(item->user.begin(),item->user.end(),[&username_or_email](const auto& u){
-                                 return u->username==username_or_email || u->email==username_or_email;
+                                 return u->userename==username_or_email || u->email==username_or_email;
                                 });
                  if(userIt==item->user.end()){
                          return false;
@@ -436,8 +437,8 @@ bool Farmers::loginUser(const std::string& username_or_email,const std::string& 
 void Farmers::displayMenu(){
         std::cout<<"\n=======Aunthentication System=========="
                 <<"\n1.Register:" 
-		<<"\n2.Login:"                                                 
-		<<"\n3.Exit:"
+		\<<"\n2.Login:"                                                 
+		<<"\n3.Exit:'
                 <<"\nChoise";
 }
 void Farmers::registerUser(){
