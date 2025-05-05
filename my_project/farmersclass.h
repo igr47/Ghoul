@@ -132,8 +132,8 @@ class Farmers:public Base{
 				user.clear();
 				if(j.contains("Account") && j["Account"].is_array()){
 						for(const auto& pass : j["Account"]){
-						        UserCredentials account;
-							account.fromJson(pass);
+						        auto account=std::make_shared<UserCredentials>();
+							account->fromJson(pass);
 							user.push_back(account);
 						}
 				}
