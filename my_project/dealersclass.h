@@ -3,6 +3,7 @@
 #include "farmersclass.h"
 #include "payment_types.h"
 #include "login.h"
+#include "notifications.h"
 #include <iostream>
 #include <string>
 #include <nlohmann/json.hpp>
@@ -146,6 +147,7 @@ class Dealers:public Farmers{
                         std::vector<PaymentRecord> paymentRecords;
                         double totalPayments = 0.0;
 			std::vector<std::shared_ptr<UserCredentials>> user;
+			std::vector<Notifications> notifications;
 
                         void addPaymentRecord(const PaymentRecord& record) {
                                 paymentRecords.push_back(record);
@@ -191,6 +193,11 @@ class Dealers:public Farmers{
 					loginArray.push_back(pass->toJson());
 				}
                                 j["Account"] = loginArray;
+				json notificationArray=json::array();
+				for(const auto& notif : notifications){
+					notificationArray.push_back(notif.toJson());
+				}
+				j["Notifications"]=notificationArray;
 				return j;
 			}
 			void fromJson(const json& j) {
@@ -243,7 +250,14 @@ class Dealers:public Farmers{
                                                 user.push_back(account);
                                         }
                                 }
-
+				notifications.clear();
+				if(j.contains("Notifications") && j["Notifications"].is_array()){
+					for(const auto& notif : j["Notifications"]){
+						Notifications notify;
+						notify.fromJson(notif);
+						notifications.push_back(notify);
+					}
+				}
                                 totalPayments = j.value("TotalPayments", 0.0);
 		}
                                 
@@ -273,6 +287,8 @@ class Dealers:public Farmers{
 		void registerUser();
 		void loginUser();
 		void LogIn();
+		bool sendNotification(const std::string& sender,const std::string& receiver,const std::string& message,const std::function<std::vector<std::shared_ptr<Farmers::Farmer>>()>& readFarmers,const std::function<std::vector<std::shared_ptr<Dealer>>()>& readDealers);
+		void sendNotifications(const std::function<std::vector<std::shared_ptr<Farmers::Farmer>>()>& readFarmers,const std::function<std::vector<std::shared_ptr<Dealer>>()>& readDealers);
 };
 #endif
 

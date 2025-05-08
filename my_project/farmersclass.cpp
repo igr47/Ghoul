@@ -272,7 +272,6 @@ void Farmers::addFarmProduce(const std::function<std::vector<std::shared_ptr<Far
         return;
     }
     
-    // Dealer selection (keep existing code)
     int dealerinput_option;
     std::cout << "Would you like to add/change a farmproduce dealer?\n"
               << "1.Yes/2.No\n";
@@ -292,7 +291,7 @@ void Farmers::addFarmProduce(const std::function<std::vector<std::shared_ptr<Far
         std::cout << "Enter the dealers id you wish to be your produce buyer:\n";
         std::getline(std::cin, newDealersId);
         
-        auto dealersIt = std::find_if(dealers.begin(), dealers.end(),
+        auto ealersIt = std::find_if(dealers.begin(), dealers.end(),
             [&newDealersId](const std::shared_ptr<Dealers::Dealer>& dealer) {
                 return dealer->dealer_id == newDealersId;
             });
@@ -401,7 +400,7 @@ void Farmers::addFarmProduce(const std::function<std::vector<std::shared_ptr<Far
     std::cout << "\nAll produce data successfully saved!\n";
 }
 bool Farmers::registerUser(const std::string& username,const std::string& email,const std::string& password,const std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction){ 
-	auto farmers=readFunction();                                     
+	auto farmers=readFunction();                            
 	for(const auto& farmer : farmers){                                       
 		if(std::any_of(farmer->user.begin(),farmer->user.end(),[&username,&email](const auto& u){
 					return u->username==username || u->email==email;
@@ -440,15 +439,19 @@ void Farmers::displayMenu(){
 		<<"\n3.Exit:"
                 <<"\nChoise";
 }
-void Farmers::registerUser(){
+void Farmers::registerUser(const std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction>){
+	auto farmerslist=readFunction();
         std::string username,password,email;
         std::cout<<"\n=======Registration=======";
 	std::cout<<"\nUsername: ";
         std::getline(std::cin,username);
+	current_user=username
         std::cout<<"\nEmail: ";
         std::getline(std::cin,email);
         std::cout<<"\nPassword: ";
         std::getline(std::cin,password);
+	json farmerJson=toFarmerJson(farmerslist);
+	writeToFile("farmer.json",farmerJson);
         if(registerUser(username,email,password,readFromFile)){
                 std::cout<<"Registration successfull.\n";
         }else{
@@ -474,7 +477,7 @@ void Farmers::LogIn(){
 	std::cin>>opt;
         switch(opt){
                 case 1:
-                        registerUser();                                                  
+                        registerUser(readFromFile);                                                  
 			break;                                                   
 		case 2:                         
 			loginUser();              
@@ -486,6 +489,66 @@ void Farmers::LogIn(){
                         break;
         }
 }
+void Farmers::getDetails(const std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction){
+	auto farmers=readFunction();
+	std::string curren_user;
+	if(loginUser()){
+		auto it=std::find_if(farmers.begin(),farmers.end(),[],(const std::shared_ptr<Farmer>& f){
+				for(const auto& item : f->login){
+				        return f->current_user==item.username;
+				}
+			});
+	}
+}		
+std::vector<Notifications> Farmers::getUnreadNotifications(const std::string& username){
+	std::vector<Notifications> uread;
+	for(auto& notif : notifications){
+		if(notif.receiver==username && !notif.is_read){
+			unread.push_back(notif);
+		}
+	}
+	return unread;
+}
+bool Farmers::markAsRead(const std::string& notification_id){
+	for(auto& notif : notifications){
+		if(notif.id==notification_id){
+			notif.is_read=true;
+			json farmerJson=toJsonFarmers(farmers);
+			writeToFile("farmers.json",farmerJson);
+			return true;
+		}
+	}
+	return false;
+}
+void Farmers::veiwNotifications(){
+	auto unread=getUnreadNotifications(current_user);
+	if(unread.empty()){
+		std::cout<<"\nNo notifications!!!";
+	}else{
+		std::cout<<"\nUnread notifications:";
+		for(size_t i=0;i<unread.size();++i){
+			std::cout<<i+1<<"\nFrom: "<<unread[i].sender
+				<<"\nMeaasge: "<<unread[i].message
+				<<"\nTime: "<<std::put_time(std::localtime(&unread[i].timestamp), "%Y-%m-%d %H:%M:%S")
+				<<"\n";
+		}
+
+		std::cout<<"\nEnter number to veiw(0 to cancle):";
+		int notif_choise;
+		std::cin>>notif_choise;
+		std::cin.ignore();
+		if(notif_choise>0 && notif_choise<unread.size()){
+			markAsRead(unread[notif_choise-1].id);
+		}
+	}
+}
+void Farmers::chekNotifications(const std::string& Username){
+	auto unread=getUnreadNotification(username);
+	if(!unread.empty()){
+		std::cout<<"\nYou have "<<unread.size()<< "new notification(s)!!";
+	}
+}
+
 	
 
 

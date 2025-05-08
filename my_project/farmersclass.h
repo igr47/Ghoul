@@ -9,6 +9,7 @@
 #include "agriculture_types.h"
 #include "payment_types.h"
 #include "login.h"
+#include "notifications.h"
 #include <functional>
 using json=nlohmann::json;
 
@@ -55,6 +56,7 @@ class Farmers:public Base{
 		struct Farmer{
 		        std::string farmersname;
 		        std::string farmname;
+			std::string current_user;
 		        int phonenumber;
 		        std::vector<double>farmproduce;
 			std::vector<Produce>produce;
@@ -66,9 +68,11 @@ class Farmers:public Base{
 		        int age;
 			std::vector<FarmerPayment> paymentHistory;
 			std::vector<std::shared_ptr<UserCredentials>> user;
+			std::vector<Notifications> notifications;
 			json toJson() const{
                                 json e;
                                 e["Id"] = id;
+				e("current_user"]=current_user;
                                 e["Name"] = farmersname;
                                 e["FarmName"] = farmname;
                                 e["Location"] = location;
@@ -91,6 +95,11 @@ class Farmers:public Base{
 					loginArray.push_back(pass->toJson());
 				}
 				e["Account"] = loginArray;
+				json notificationsArray=json::array();
+				for(const auto& notif : notifications){
+					notificationsArray.push_back(notif.toJson());
+				}
+				e.["Notifications"]=notificationsArray();
                                 e["Produce"] = produceArray;
                                 e["My_Dealers_Id"] = dealer_id;
                                 e["Overall_Total"] = totalproduce;
@@ -137,6 +146,14 @@ class Farmers:public Base{
 							user.push_back(account);
 						}
 				}
+				notifications.clear();
+				if(j.contains("Notifications") && j["Notifications"].is_array()){
+					for(const auto& item :j["Notifications"]){
+						Notifications n;
+						n.fromJson(item);
+						notifications.push_back(n);
+					}
+				}
                         } catch (const json::exception& e) {
                                 std::cerr << "JSON parsing error in fromJson: " << e.what() << "\n";
                                 
@@ -161,6 +178,8 @@ class Farmers:public Base{
 		void registerUser();
 		void loginUser();
                 void LogIn();
+		std::vector<Notifications> getUnreadNotifications(const std::string& username);
+		bool markAsRead(const std::string& notification_id);
 		friend class Dealers;
 
 };

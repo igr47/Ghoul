@@ -5,6 +5,8 @@
 #include <sodium.h>
 #include "shared_utils.h"
 #include "payment_types.h"
+#include "notifications.h"
+#include <range>
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -822,6 +824,79 @@ void Dealers::LogIn(){
 			break;
 	}
 }
+bool Dealers::sendNotification(const std::string& sender;const std::string& receiver,const std::string& message,const std::function<std::vector<std::shared_ptr<Farmers::Farmer>>()>& readFarmers,std::function<std::vector<std::shared_ptr<Dealer>>()>& readDealers){
+	auto farmers=readFarmers();
+	auto dealers=readDealers();
+	Notifications n;
+	n.receiver=receiver;
+	n.sender=sender;
+	n.message=message;
+	n.timestamp=std::time(nullptr);
+	n.is_read=false;
+	json dealersJson=toJsonDealers(dealers);  
+	writeToFile("dealers.json",dealersJson);
+	json farmersJson=toJsonFarmers(faremrs);
+	writeToFile("Farmers.json",farmersJson);
+}
+void Dealers::sendNotifications(const std::function<std::vector<std::shared_ptr<Farmers::Farmer>>()>& readFarmers,const std::function<std::vector<std::shared_ptr<Dealer>>()>& readDealers){
+	auto farmers=readFarmers();
+	auto dealers=ReadDealers();
+	int opt;
+	std::cout<<"\n========Messanger=======:";
+	std::cout<<"\nWhich of the following would wish to undertake?";
+	std::cout<<"\n1.Send a notification";
+	std::cout<<"\n2.LogOut:";
+	std::cin>>opt;
+	std::cin.ignore();
+	std::vector<Farmer::Farmer> matchingFarmers;
+	for(const auto& farmer :farmers){
+		if(std::ranges::find_if(dealers,[&farmer](const std::shared_ptr<Dealer>& dealer){
+					return farmer.dealer_id==dealer->dealer_id;
+				}) !=dealers.end()){
+			matchingFarmers.push_back(farmer);
+		}
+	}
+	do{
+		std::cout<<"\nFarmers you can send notifications in your dealership: ";
+		for(const auto& farmer : matchingFarmers){
+			std::cout<<"\nFarmer: "<<farmer.farmersname <<"||"<<"FarmeName: "<<farmer.farmname;
+		}
+
+		std::cout<<"\nSelect farmer(0 to send to all) who you wish to send your notifications to: ";
+		int farmer_choise;
+		std::cin>>farmer_choise;
+		std::cin.ignore();
+		for(const auto& farmer : matchingFarmers){
+			if(farmer_choise<0 || farmer_choise>farmer.size()){
+				std::cout<<"\nInvalid input!!";
+			}
+			std::cout<<"\nEnter the your notification: ";
+			std::string message;
+			std::getline(std::cin,message);
+			if(farmer_choise==0){
+				sendNotification(current_user,farmer,message,Farmers::readFromFile,readFromFile);
+				std::cout<<"\nNotification sent to all farmers in your dealership!!";
+			}else{
+				std::cout<<"\nEnter the name of the farmer you wish to send the notification.Should be in your dealership,";
+				std::string name;
+				std::getline(std::cin,name);
+				auto farmerIt=std::find_if(farmer.begin(),farmer.end(),[&name](const std::shared_ptr<Farmers::Farmer>& f){
+						return f->farmersname==name;
+					});
+				if(farmerIt!=farmer.end){
+					sendNotification(current_user,farmerIt,message,Farmers::readFromFile,readFromFile);
+					std::cout<<"\nNotification sent.";
+				}else{
+					std::cout<<"\nFarmer not found!!";
+				}
+			}
+		}
+	}while(opt==1);
+	if(opt==2){
+		break;
+	}
+}
+
 
 
 

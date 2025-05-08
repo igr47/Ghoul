@@ -1,1 +1,18 @@
-[]
+[
+    {
+        "Account": [],
+        "Created_At": "2025-05-06 16:02:54",
+        "FarmName": "Orion Farm",
+        "Id": "01654d38-2abd-4085-ae05-293c9f0f3886",
+        "Location": "Embu",
+        "My_Dealers_Id": "",
+        "Name": "Elvis Kariuki",
+        "Overall_Average": 0.0,
+        "Overall_Total": 0.0,
+        "PaymentHistory": [],
+        "PhoneNumber": 987748339,
+        "Produce": [],
+        "Updated_At": "2025-05-06 16:02:54",
+        "Year Of Birth": 2002
+    }
+]

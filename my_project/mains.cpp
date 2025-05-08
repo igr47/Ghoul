@@ -83,6 +83,7 @@ int main() {
                         }
                     } while (option != 6);
                 } else if(option2==2){
+		    f.logIn();
                     f.addFarmProduce(Farmers::readFromFile);
                 }
             } while (option2 != 2);
