@@ -178,8 +178,10 @@ class Farmers:public Base{
 		void registerUser();
 		void loginUser();
                 void LogIn();
-		std::vector<Notifications> getUnreadNotifications(const std::string& username);
+		std::vector<Notifications> getUnreadNotifications(std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction);
 		bool markAsRead(const std::string& notification_id);
+		void viewNotificatiuons();
+		void checkNotifications();
 		friend class Dealers;
 
 };

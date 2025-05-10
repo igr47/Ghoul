@@ -828,6 +828,7 @@ bool Dealers::sendNotification(const std::string& sender;const std::string& rece
 	auto farmers=readFarmers();
 	auto dealers=readDealers();
 	Notifications n;
+	n.id=generateUUID;
 	n.receiver=receiver;
 	n.sender=sender;
 	n.message=message;

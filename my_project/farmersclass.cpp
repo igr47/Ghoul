@@ -488,22 +488,12 @@ void Farmers::LogIn(){
 			std::cout<<"\nPlease enter valid option.";
                         break;
         }
-}
-void Farmers::getDetails(const std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction){
-	auto farmers=readFunction();
-	std::string curren_user;
-	if(loginUser()){
-		auto it=std::find_if(farmers.begin(),farmers.end(),[],(const std::shared_ptr<Farmer>& f){
-				for(const auto& item : f->login){
-				        return f->current_user==item.username;
-				}
-			});
-	}
 }		
-std::vector<Notifications> Farmers::getUnreadNotifications(const std::string& username){
+std::vector<Notifications> Farmers::getUnreadNotifications(std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction){
+	auto farmers=readFunction();
 	std::vector<Notifications> uread;
 	for(auto& notif : notifications){
-		if(notif.receiver==username && !notif.is_read){
+		if(notif.receiver==farmers->current_user && !notif.is_read){
 			unread.push_back(notif);
 		}
 	}
@@ -521,7 +511,7 @@ bool Farmers::markAsRead(const std::string& notification_id){
 	return false;
 }
 void Farmers::veiwNotifications(){
-	auto unread=getUnreadNotifications(current_user);
+	auto unread=getUnreadNotifications(readFromFile);
 	if(unread.empty()){
 		std::cout<<"\nNo notifications!!!";
 	}else{
@@ -542,8 +532,8 @@ void Farmers::veiwNotifications(){
 		}
 	}
 }
-void Farmers::chekNotifications(const std::string& Username){
-	auto unread=getUnreadNotification(username);
+void Farmers::chekNotifications(){
+	auto unread=getUnreadNotification(readFromFile);
 	if(!unread.empty()){
 		std::cout<<"\nYou have "<<unread.size()<< "new notification(s)!!";
 	}
