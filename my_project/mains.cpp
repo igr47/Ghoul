@@ -84,7 +84,30 @@ int main() {
                     } while (option != 6);
                 } else if(option2==2){
 		    f.logIn();
-                    f.addFarmProduce(Farmers::readFromFile);
+		    do{
+		        std::cout<< "====Welcome Farmer====";
+		        int option;
+		        std::cout<<"Which of the following would you like to undertake";
+		        f.checkNotifications();
+		        std::cout<<"\n1.Add your farm produce?";
+		        std::cout<<"\n2.View notifications?";
+			std::cout<<"\n3.Exit:";
+		        std::cin>>option;
+		        std::cin.ignore();
+		        switch(option){
+			        case 1:
+                                        f.addFarmProduce(Farmers::readFromFile);
+				        break;
+			        case 2:
+				        f.viewNotifications();
+				        break;
+				case 3:
+					break;
+			        default:
+				        std::cout<<"\nPlease enter a valid option";
+				        break;
+			}
+		    }while(option!=0);
                 }
             } while (option2 != 2);
         } else if (choice == 2) {
@@ -147,6 +170,7 @@ int main() {
                     } while (processchoice != 6);
                 } else if(optiondealer==2){
                     int processchoise_2;
+		    d.login();
                     do{
                         // Dealer operations menu
                         std::cout<<"$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n";
@@ -157,7 +181,8 @@ int main() {
                         std::cout<<"3.Veiw your current inventoro?\n";
                         std::cout<<"4.View all your transactions?\n";
                         std::cout<<"5.Search for a farmer by name or location?\n";
-                        std::cout<<"6.Reaturn to main menu?\n";
+			std::cout<<"6.Send notifications?\n";
+                        std::cout<<"7.Reaturn to main menu?\n";
                         std::cout<<"$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n";
                         std::cin>>processchoise_2;
                         std::cin.ignore();
@@ -175,15 +200,18 @@ int main() {
 				d.viewTransactions(Dealers::readFromFile);
                                 break;
                             case 5:
+				d.searchFarmers(Farmers::readFromFile);
                                 break;
-                            case 6:
+			    case 6:
+				d.sendNotifications(Farmers::readFromFile, Dealers::readFromFile);
+                            case 7:
                                 std::cout<<"Returning to main menu!\n";
                                 break;
                             default:
                                 std::cout<<"Pease enter valid input from (1-6)!\n";
                                 break;
                         }
-                    } while(processchoise_2 !=6);
+                    } while(processchoise_2 !=7);
                 }
             } while (optiondealer != 2);
         }
