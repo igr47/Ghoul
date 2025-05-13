@@ -200,7 +200,6 @@ int main() {
 				d.viewTransactions(Dealers::readFromFile);
                                 break;
                             case 5:
-				d.searchFarmers(Farmers::readFromFile);
                                 break;
 			    case 6:
 				d.sendNotifications(Farmers::readFromFile, Dealers::readFromFile);

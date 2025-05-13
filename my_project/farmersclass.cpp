@@ -204,7 +204,7 @@ void Farmers::searchFarmersDetails(const std::function<std::vector<std::shared_p
 	}
 }
 void Farmers::updateFarmersDetails(const std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction){
-	farmerslist=readFunction();
+	auto farmerslist=readFunction();
 	std::string name;
 	std::cout<<"Enter name of the farmer you wish to update!\n";
 	std::cin.ignore();
@@ -441,11 +441,12 @@ void Farmers::displayMenu(){
 }
 void Farmers::registerUser(const std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction){
 	auto farmerslist=readFunction();
+	auto farmer=std::make_shared<Farmer>();
         std::string username,password,email;
         std::cout<<"\n=======Registration=======";
 	std::cout<<"\nUsername: ";
         std::getline(std::cin,username);
-	current_user=username
+	farmer->current_user=username;
         std::cout<<"\nEmail: ";
         std::getline(std::cin,email);
         std::cout<<"\nPassword: ";
@@ -492,8 +493,8 @@ void Farmers::LogIn(){
 std::vector<Notifications> Farmers::getUnreadNotifications(std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction){
 	auto farmers=readFunction();
 	std::vector<Notifications> unread;
-	for(auto& notif : farmers->notifications){
-		if(notif.receiver==farmers->current_user && !notif.is_read){
+	for(auto& notif : farmers.notifications){
+		if(notif.receiver==farmers.current_user && !notif.is_read){
 			unread.push_back(notif);
 		}
 	}
@@ -534,7 +535,7 @@ void Farmers::viewNotifications(){
 	}
 }
 void Farmers::checkNotifications(){
-	auto unread=getUnreadNotification(readFromFile);
+	auto unread=getUnreadNotifications(readFromFile);	
 	if(!unread.empty()){
 		std::cout<<"\nYou have "<<unread.size()<< "new notification(s)!!";
 	}
