@@ -83,10 +83,10 @@ int main() {
                         }
                     } while (option != 6);
                 } else if(option2==2){
-		    f.logIn();
+		    int option;
+		    f.LogIn();
 		    do{
 		        std::cout<< "====Welcome Farmer====";
-		        int option;
 		        std::cout<<"Which of the following would you like to undertake";
 		        f.checkNotifications();
 		        std::cout<<"\n1.Add your farm produce?";
@@ -170,7 +170,7 @@ int main() {
                     } while (processchoice != 6);
                 } else if(optiondealer==2){
                     int processchoise_2;
-		    d.login();
+		    d.LogIn();
                     do{
                         // Dealer operations menu
                         std::cout<<"$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$\n";

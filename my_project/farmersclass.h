@@ -72,7 +72,7 @@ class Farmers:public Base{
 			json toJson() const{
                                 json e;
                                 e["Id"] = id;
-				e("current_user"]=current_user;
+				e["current_user"]=current_user;
                                 e["Name"] = farmersname;
                                 e["FarmName"] = farmname;
                                 e["Location"] = location;
@@ -99,7 +99,7 @@ class Farmers:public Base{
 				for(const auto& notif : notifications){
 					notificationsArray.push_back(notif.toJson());
 				}
-				e.["Notifications"]=notificationsArray();
+				e["Notifications"]=notificationsArray;
                                 e["Produce"] = produceArray;
                                 e["My_Dealers_Id"] = dealer_id;
                                 e["Overall_Total"] = totalproduce;
@@ -175,12 +175,12 @@ class Farmers:public Base{
 		bool registerUser(const std::string& username,const std::string& email,const std::string& password,const std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction);
                 bool loginUser(const std::string& username_or_email,const std::string& password,const std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction);
 		void displayMenu();
-		void registerUser();
+		void registerUser(const std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction);
 		void loginUser();
                 void LogIn();
 		std::vector<Notifications> getUnreadNotifications(std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction);
-		bool markAsRead(const std::string& notification_id);
-		void viewNotificatiuons();
+		bool markAsRead(const std::string& notification_id,std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction);
+		void viewNotifications();
 		void checkNotifications();
 		friend class Dealers;
 

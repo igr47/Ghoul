@@ -291,7 +291,7 @@ void Farmers::addFarmProduce(const std::function<std::vector<std::shared_ptr<Far
         std::cout << "Enter the dealers id you wish to be your produce buyer:\n";
         std::getline(std::cin, newDealersId);
         
-        auto ealersIt = std::find_if(dealers.begin(), dealers.end(),
+        auto dealersIt = std::find_if(dealers.begin(), dealers.end(),
             [&newDealersId](const std::shared_ptr<Dealers::Dealer>& dealer) {
                 return dealer->dealer_id == newDealersId;
             });
@@ -439,7 +439,7 @@ void Farmers::displayMenu(){
 		<<"\n3.Exit:"
                 <<"\nChoise";
 }
-void Farmers::registerUser(const std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction>){
+void Farmers::registerUser(const std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction){
 	auto farmerslist=readFunction();
         std::string username,password,email;
         std::cout<<"\n=======Registration=======";
@@ -450,7 +450,7 @@ void Farmers::registerUser(const std::function<std::vector<std::shared_ptr<Farme
         std::getline(std::cin,email);
         std::cout<<"\nPassword: ";
         std::getline(std::cin,password);
-	json farmerJson=toFarmerJson(farmerslist);
+	json farmerJson=toJsonFarmers(farmerslist);
 	writeToFile("farmer.json",farmerJson);
         if(registerUser(username,email,password,readFromFile)){
                 std::cout<<"Registration successfull.\n";
@@ -491,15 +491,16 @@ void Farmers::LogIn(){
 }		
 std::vector<Notifications> Farmers::getUnreadNotifications(std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction){
 	auto farmers=readFunction();
-	std::vector<Notifications> uread;
-	for(auto& notif : notifications){
+	std::vector<Notifications> unread;
+	for(auto& notif : farmers->notifications){
 		if(notif.receiver==farmers->current_user && !notif.is_read){
 			unread.push_back(notif);
 		}
 	}
 	return unread;
 }
-bool Farmers::markAsRead(const std::string& notification_id){
+bool Farmers::markAsRead(const std::string& notification_id,std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction){
+	auto farmers=readFunction();
 	for(auto& notif : notifications){
 		if(notif.id==notification_id){
 			notif.is_read=true;
@@ -510,7 +511,7 @@ bool Farmers::markAsRead(const std::string& notification_id){
 	}
 	return false;
 }
-void Farmers::veiwNotifications(){
+void Farmers::viewNotifications(){
 	auto unread=getUnreadNotifications(readFromFile);
 	if(unread.empty()){
 		std::cout<<"\nNo notifications!!!";
@@ -528,11 +529,11 @@ void Farmers::veiwNotifications(){
 		std::cin>>notif_choise;
 		std::cin.ignore();
 		if(notif_choise>0 && notif_choise<unread.size()){
-			markAsRead(unread[notif_choise-1].id);
+			markAsRead(unread[notif_choise-1].id,readFromFile);
 		}
 	}
 }
-void Farmers::chekNotifications(){
+void Farmers::checkNotifications(){
 	auto unread=getUnreadNotification(readFromFile);
 	if(!unread.empty()){
 		std::cout<<"\nYou have "<<unread.size()<< "new notification(s)!!";

@@ -14,15 +14,15 @@ struct Notifications{
 	json toJson()const{
 		return{
 			{"ID" , id},
-			{"From" , receiver,
+			{"From" , receiver},
 			{"Message" , message},
 			{"Seen_at" , timestamp},
 			{"✓✓" , is_read}
-		}
+		};
 	}
 
 	void fromJson(const json& j){
-		id=j.vlaue("id","");
+		id=j.value("id","");
 		receiver=j.value("From","");
 		message=j.value("Message","");
 		timestamp=j.value("Seen_at",0);
