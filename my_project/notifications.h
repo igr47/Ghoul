@@ -6,6 +6,7 @@ using json=nlohmann::json;
 
 struct Notifications{
 	std::string id;
+	std::string sender;
 	std::string receiver;
 	std::string message;
 	std::time_t timestamp;
@@ -14,7 +15,8 @@ struct Notifications{
 	json toJson()const{
 		return{
 			{"ID" , id},
-			{"From" , receiver},
+			{"From" , sender},
+			{"To" , receiver},
 			{"Message" , message},
 			{"Seen_at" , timestamp},
 			{"✓✓" , is_read}
@@ -23,7 +25,8 @@ struct Notifications{
 
 	void fromJson(const json& j){
 		id=j.value("id","");
-		receiver=j.value("From","");
+		receiver=j.value("To","");
+		sender=j.value("From","");
 		message=j.value("Message","");
 		timestamp=j.value("Seen_at",0);
 		is_read=j.value("✓✓",false);

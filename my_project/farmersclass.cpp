@@ -490,19 +490,21 @@ void Farmers::LogIn(){
                         break;
         }
 }		
-std::vector<Notifications> Farmers::getUnreadNotifications(std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction){
+std::vector<Notifications> Farmers::getUnreadNotifications(const std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction){
 	auto farmers=readFunction();
+	auto farmer=std::make_shared<Farmer>();
 	std::vector<Notifications> unread;
-	for(auto& notif : farmers.notifications){
-		if(notif.receiver==farmers.current_user && !notif.is_read){
+	for(auto& notif : farmer->notifications){
+		if(notif.receiver==farmer->current_user && !notif.is_read){
 			unread.push_back(notif);
 		}
 	}
 	return unread;
 }
-bool Farmers::markAsRead(const std::string& notification_id,std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction){
+bool Farmers::markAsRead(const std::string& notification_id,const std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction){
 	auto farmers=readFunction();
-	for(auto& notif : notifications){
+	auto farmer=std::make_shared<Farmer>();
+	for(auto& notif : farmer->notifications){
 		if(notif.id==notification_id){
 			notif.is_read=true;
 			json farmerJson=toJsonFarmers(farmers);

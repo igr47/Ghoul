@@ -137,6 +137,7 @@ class Dealers:public Farmers{
 		struct Dealer:public Base{
 			std::string dealer_id;
 			std::string dealersname;
+			std::string current_user;
 			std::string cooperation;
 			std::string location;
 			int age;
@@ -159,6 +160,7 @@ class Dealers:public Farmers{
 				json j;
 				j["Id"]=dealer_id;
 				j["Name"]=dealersname;
+				j["Current_user"]=current_user;
 				j["Cooperation_Name"]=cooperation;
 				j["Location"]=location;
 				j["Yaer Of Birth"]=age;
@@ -203,6 +205,7 @@ class Dealers:public Farmers{
 			void fromJson(const json& j) {
                                 dealer_id=j.value("Id",""); 
 				dealersname = j.value("Name", "");
+				current_user = j.value("Current_User","");
                                 cooperation = j.value("Cooperation_Name", "");
                                 location = j.value("Location", "");
                                 age = j.value("Year_Of_Birth", 0);
@@ -284,10 +287,10 @@ class Dealers:public Farmers{
 		bool registerUser(const std::string& username,const std::string& email,const std::string& password,const std::function<std::vector<std::shared_ptr<Dealer>>()>& readFunction);
 		bool loginUser(const std::string& username_or_email,const std::string& password,const std::function<std::vector<std::shared_ptr<Dealer>>()>& readFunction);
 		void displayMenu();
-		void registerUser();
+		void registerUser(const std::function<std::vector<std::shared_ptr<Dealer>>()>& readFunction);
 		void loginUser();
 		void LogIn();
-		bool sendNotification(const std::string& sender,const std::string& receiver,const std::string& message,const std::function<std::vector<std::shared_ptr<Farmers::Farmer>>()>& readFarmers,const std::function<std::vector<std::shared_ptr<Dealer>>()>& readDealers);
+		bool sendNotification(const std::string& receiver,const std::string& message,const std::function<std::vector<std::shared_ptr<Farmers::Farmer>>()>& readFarmers,const std::function<std::vector<std::shared_ptr<Dealer>>()>& readDealers);
 		void sendNotifications(const std::function<std::vector<std::shared_ptr<Farmers::Farmer>>()>& readFarmers,const std::function<std::vector<std::shared_ptr<Dealer>>()>& readDealers);
 };
 #endif

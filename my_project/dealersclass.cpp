@@ -6,7 +6,7 @@
 #include "shared_utils.h"
 #include "payment_types.h"
 #include "notifications.h"
-#include <range>
+#include <ranges>
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -778,15 +778,20 @@ void Dealers::displayMenu(){
 		<<"\n3.Exit:"
 		<<"\nChoise";
 }
-void Dealers::registerUser(){
+void Dealers::registerUser(const std::function<std::vector<std::shared_ptr<Dealer>>()>& readFunction){
+	auto dealers=readFunction();
+	auto dealer = std::make_shared<Dealer>();
 	std::string username,password,email;
 	std::cout<<"\n=======Registration=======";
 	std::cout<<"\nUsername: ";
 	std::getline(std::cin,username);
+	dealer->current_user=username;
 	std::cout<<"\nEmail: ";
 	std::getline(std::cin,email);
 	std::cout<<"\nPassword: ";
 	std::getline(std::cin,password);
+	json dealersJson=toJsonDealers(dealers); 
+	writeToFile("dealers.json",dealersJson);
 	if(registerUser(username,email,password,readFromFile)){
 		std::cout<<"Registration successfull.\n";
 	}else{
@@ -824,24 +829,24 @@ void Dealers::LogIn(){
 			break;
 	}
 }
-bool Dealers::sendNotification(const std::string& sender;const std::string& receiver,const std::string& message,const std::function<std::vector<std::shared_ptr<Farmers::Farmer>>()>& readFarmers,std::function<std::vector<std::shared_ptr<Dealer>>()>& readDealers){
+bool Dealers::sendNotification(const std::string& receiver,const std::string& message,const std::function<std::vector<std::shared_ptr<Farmers::Farmer>>()>& readFarmers,std::function<std::vector<std::shared_ptr<Dealer>>()>& readDealers){
 	auto farmers=readFarmers();
 	auto dealers=readDealers();
 	Notifications n;
 	n.id=generateUUID;
 	n.receiver=receiver;
-	n.sender=sender;
+	n.sender=dealers->current_user;
 	n.message=message;
 	n.timestamp=std::time(nullptr);
 	n.is_read=false;
 	json dealersJson=toJsonDealers(dealers);  
 	writeToFile("dealers.json",dealersJson);
-	json farmersJson=toJsonFarmers(faremrs);
+	json farmersJson=toJsonFarmers(farmers);
 	writeToFile("Farmers.json",farmersJson);
 }
 void Dealers::sendNotifications(const std::function<std::vector<std::shared_ptr<Farmers::Farmer>>()>& readFarmers,const std::function<std::vector<std::shared_ptr<Dealer>>()>& readDealers){
 	auto farmers=readFarmers();
-	auto dealers=ReadDealers();
+	auto dealers=readDealers();
 	int opt;
 	std::cout<<"\n========Messanger=======:";
 	std::cout<<"\nWhich of the following would wish to undertake?";
@@ -875,7 +880,7 @@ void Dealers::sendNotifications(const std::function<std::vector<std::shared_ptr<
 			std::string message;
 			std::getline(std::cin,message);
 			if(farmer_choise==0){
-				sendNotification(current_user,farmer,message,Farmers::readFromFile,readFromFile);
+				sendNotification(farmer,message,Farmers::readFromFile,readFromFile);
 				std::cout<<"\nNotification sent to all farmers in your dealership!!";
 			}else{
 				std::cout<<"\nEnter the name of the farmer you wish to send the notification.Should be in your dealership,";
@@ -884,8 +889,8 @@ void Dealers::sendNotifications(const std::function<std::vector<std::shared_ptr<
 				auto farmerIt=std::find_if(farmer.begin(),farmer.end(),[&name](const std::shared_ptr<Farmers::Farmer>& f){
 						return f->farmersname==name;
 					});
-				if(farmerIt!=farmer.end){
-					sendNotification(current_user,farmerIt,message,Farmers::readFromFile,readFromFile);
+				if(farmerIt!=farmer.end()){
+					sendNotification(farmerIt,message,Farmers::readFromFile,readFromFile);
 					std::cout<<"\nNotification sent.";
 				}else{
 					std::cout<<"\nFarmer not found!!";
@@ -894,7 +899,7 @@ void Dealers::sendNotifications(const std::function<std::vector<std::shared_ptr<
 		}
 	}while(opt==1);
 	if(opt==2){
-		break;
+		return;
 	}
 }
 
