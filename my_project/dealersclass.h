@@ -266,6 +266,7 @@ class Dealers:public Farmers{
                                 
 		};
 		std::vector<std::shared_ptr<Dealer>>dealerslist;
+		Dealer current_data;
 	public:
 		Dealers();
 		

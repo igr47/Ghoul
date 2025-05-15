@@ -817,7 +817,7 @@ void Dealers::LogIn(){
 	std::cin>>opt;
 	switch(opt){
 		case 1:
-			registerUser();
+			registerUser(readFromFile);
 			break;
 		case 2:
 			loginUser();
@@ -829,13 +829,20 @@ void Dealers::LogIn(){
 			break;
 	}
 }
-bool Dealers::sendNotification(const std::string& receiver,const std::string& message,const std::function<std::vector<std::shared_ptr<Farmers::Farmer>>()>& readFarmers,std::function<std::vector<std::shared_ptr<Dealer>>()>& readDealers){
+bool Dealers::sendNotification(const std::string& receiver,const std::string& message,const std::function<std::vector<std::shared_ptr<Farmers::Farmer>>()>& readFarmers,const std::function<std::vector<std::shared_ptr<Dealer>>()>& readDealers){
 	auto farmers=readFarmers();
 	auto dealers=readDealers();
 	Notifications n;
-	n.id=generateUUID;
+	n.id=generateUUID();
 	n.receiver=receiver;
-	n.sender=dealers->current_user;
+	auto currentDealerIt=std::find_if(dealers.begin(),dealers.end(),[this](const std::shared_ptr<Dealer>& dealer){
+			return dealer->current_data.dealer_id==this->current_data.dealer_id;
+		});
+	if(currentDealerIt!=dealers.end()){
+		n.sender=(*currentDealerIt)->current_data.current_user;
+	}else{
+		n.sender="Unkown";
+	}
 	n.message=message;
 	n.timestamp=std::time(nullptr);
 	n.is_read=false;
@@ -854,18 +861,19 @@ void Dealers::sendNotifications(const std::function<std::vector<std::shared_ptr<
 	std::cout<<"\n2.LogOut:";
 	std::cin>>opt;
 	std::cin.ignore();
-	std::vector<Farmer::Farmer> matchingFarmers;
+	std::vector<std::shared_ptr<Farmers::Farmer>> matchingFarmers;
 	for(const auto& farmer :farmers){
-		if(std::ranges::find_if(dealers,[&farmer](const std::shared_ptr<Dealer>& dealer){
-					return farmer.dealer_id==dealer->dealer_id;
-				}) !=dealers.end()){
+		auto dealerIt=std::find_if(dealers.begin(),dealers.end(),[&farmer](const std::shared_ptr<Dealer>& dealer){
+				return farmer->dealer_id==dealer->dealer_id;
+			});
+		if(dealerIt!=dealers.end()){
 			matchingFarmers.push_back(farmer);
 		}
 	}
 	do{
 		std::cout<<"\nFarmers you can send notifications in your dealership: ";
-		for(const auto& farmer : matchingFarmers){
-			std::cout<<"\nFarmer: "<<farmer.farmersname <<"||"<<"FarmeName: "<<farmer.farmname;
+		for(size_t i=0;i<matchingFarmers.size();++i){
+			std::cout<<"\n"<<i+1<<".Farmer: "<<matchingFarmers[i]->farmersname <<" || "<<"FarmeName: "<<matchingFarmers[i]->farmname;
 		}
 
 		std::cout<<"\nSelect farmer(0 to send to all) who you wish to send your notifications to: ";
@@ -873,29 +881,23 @@ void Dealers::sendNotifications(const std::function<std::vector<std::shared_ptr<
 		std::cin>>farmer_choise;
 		std::cin.ignore();
 		for(const auto& farmer : matchingFarmers){
-			if(farmer_choise<0 || farmer_choise>farmer.size()){
+			if(farmer_choise<0 || farmer_choise>static_cast<int>(matchingFarmers.size())){
 				std::cout<<"\nInvalid input!!";
 			}
 			std::cout<<"\nEnter the your notification: ";
 			std::string message;
 			std::getline(std::cin,message);
 			if(farmer_choise==0){
-				sendNotification(farmer,message,Farmers::readFromFile,readFromFile);
+				sendNotification(farmer->farmersname,message,Farmers::readFromFile,readFromFile);
 				std::cout<<"\nNotification sent to all farmers in your dealership!!";
 			}else{
-				std::cout<<"\nEnter the name of the farmer you wish to send the notification.Should be in your dealership,";
-				std::string name;
-				std::getline(std::cin,name);
-				auto farmerIt=std::find_if(farmer.begin(),farmer.end(),[&name](const std::shared_ptr<Farmers::Farmer>& f){
-						return f->farmersname==name;
-					});
-				if(farmerIt!=farmer.end()){
-					sendNotification(farmerIt,message,Farmers::readFromFile,readFromFile);
-					std::cout<<"\nNotification sent.";
-				}else{
-					std::cout<<"\nFarmer not found!!";
-				}
+				size_t index=farmer_choise-1;
+				sendNotification(matchingFarmers[index]->farmersname,message,Farmers::readFromFile,readFromFile);
+				std::cout<<"\nNotification sent.";
 			}
+			std::cout<<"\nWould you like to send another notification?(1 for yws,2 for no):";
+			std::cin>>opt;
+			std::cin.ignore();
 		}
 	}while(opt==1);
 	if(opt==2){
