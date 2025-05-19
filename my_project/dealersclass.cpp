@@ -227,7 +227,9 @@ void Dealers::viewAvailableProduce(const std::function<std::vector<std::shared_p
         std::vector<std::shared_ptr<Farmers::Farmer>> associatedFarmers;
         std::copy_if(farmers.begin(), farmers.end(), std::back_inserter(associatedFarmers),
                     [](const std::shared_ptr<Farmers::Farmer>& farmer) {
-                        return farmer->dealer_id == currentDealer->dealer_id;
+                        return std::any_of(farmer->dealerInfo.begin(),farmer-dealerInfo.end()[&currentDealer](const Farmers::DealerInfo& dealerInfi){
+					return dealerInfo.dealer_id==currentDealer->dealer_id;
+				});
                     });
 
         if (associatedFarmers.empty()) {

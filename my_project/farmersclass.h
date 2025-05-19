@@ -52,6 +52,20 @@ class Farmers:public Base{
 				}
 			}
 		};
+		struct DealerInfo{
+			std::string dealerName;
+			std::string dealer_id;
+			json toJson() const{
+				return{
+					{"My_Dealers_Name" ,dealerName},
+					{"My_Dealers_id" , dealer_id}
+				};
+			}
+			void fromJson(const json& j){
+				dealerName=j.value("My_Dealers_Name","");
+				dealer_id=j.value("My_Dealers_Id,"");
+			}
+		}
 
 		struct Farmer{
 		        std::string farmersname;
@@ -64,7 +78,7 @@ class Farmers:public Base{
 			double averageproduce;
 			std::string id;
 		        std::string location;
-			std::string dealer_id;
+			std::vector<DealerInfo> dealerInfo;
 		        int age;
 			std::vector<FarmerPayment> paymentHistory;
 			std::vector<std::shared_ptr<UserCredentials>> user;
@@ -84,6 +98,11 @@ class Farmers:public Base{
                     
                                         produceArray.push_back(item.toJson());
                                 }
+				json dealerinfoArray = json::Array();
+				for (const auto& item : dealerInfo){
+					dealerinfoArray.push_back(item.toJson());
+				}
+				e["My_Dealer"]=dealerinfoArray;
 				json paymentsArray = json::array();
                                 for (const auto& payment : paymentHistory){ 
 
@@ -101,7 +120,6 @@ class Farmers:public Base{
 				}
 				e["Notifications"]=notificationsArray;
                                 e["Produce"] = produceArray;
-                                e["My_Dealers_Id"] = dealer_id;
                                 e["Overall_Total"] = totalproduce;
                                 e["Overall_Average"] = averageproduce;
                 
@@ -115,7 +133,6 @@ class Farmers:public Base{
                                 location = j.value("Location", "");
                                 age = j.value("Year Of Birth", 0);
                                 phonenumber = j.value("PhoneNumber", 0);
-                                dealer_id = j.value("My_Dealers_Id", "");
                                 totalproduce = j.value("Overall_Total", 0.0);
                                 averageproduce = j.value("Overall_Average", 0.0);
 
@@ -152,6 +169,14 @@ class Farmers:public Base{
 						Notifications n;
 						n.fromJson(item);
 						notifications.push_back(n);
+					}
+				}
+				dealerInfo.clear();
+				if(j.contains("My_Dealer") && j["My_Dealer"].is_array()){
+					for(const auto& item : j["My_Dealer"]){
+						DealerInfo d;
+						d.fromJson(item);
+						dealerInfo.push_back(d);
 					}
 				}
                         } catch (const json::exception& e) {

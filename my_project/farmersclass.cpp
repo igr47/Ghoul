@@ -275,37 +275,47 @@ void Farmers::addFarmProduce(const std::function<std::vector<std::shared_ptr<Far
     }
     
     int dealerinput_option;
-    std::cout << "Would you like to add/change a farmproduce dealer?\n"
-              << "1.Yes/2.No\n";
-    std::cin >> dealerinput_option;
-    std::cin.ignore();
+    do{
+        std::cout << "Would you like to add/change a farmproduce dealer?\n"
+                << "1.Yes/2.No\n";
+        std::cin >> dealerinput_option;
+        std::cin.ignore();
     
-    if(dealerinput_option == 1) {
-        auto dealers = Dealers::readFromFile();
-        std::cout << "Available Dealers:\n";
-        for(const auto& dealer : dealers) {
-            std::cout << "| ID: " << dealer->dealer_id
-                      << "| Name: " << dealer->dealersname
-                      << "| Cooperation: " << dealer->cooperation << "\n";
-        }
+        if(dealerinput_option == 1) {
+                auto dealers = Dealers::readFromFile();
+                std::cout << "Available Dealers:\n";
+                for(const auto& dealer : dealers) {
+                        std::cout << "| ID: " << dealer->dealer_id
+                                << "| Name: " << dealer->dealersname
+                                << "| Cooperation: " << dealer->cooperation << "\n";
+                }
+		DealerInfo n;
+		std::string newDealersId,newDealersName;
+		std::cout<<"\nEnter the dealer's id you wish to be your buyer: ";
+		std::getline(std::cin,newDealersId);
+		std::cout<<"\nEnter the dealers name you wish to be your buyer: ";
+		std::getline(std::cin,newDealersName);
+		n.dealerName=newDealersName;
+		n.dealer_id=newDealersId;
         
-        std::string newDealersId;
-        std::cout << "Enter the dealers id you wish to be your produce buyer:\n";
-        std::getline(std::cin, newDealersId);
+                auto dealersIt = std::find_if(dealers.begin(), dealers.end(),
+                                [&newDealersId,&newDealersId](const std::shared_ptr<Dealers::Dealer>& dealer) {
+                                                return dealer->dealer_id == newDealersId &&  dealer->dealersname==newDealersName;
+                        });
         
-        auto dealersIt = std::find_if(dealers.begin(), dealers.end(),
-            [&newDealersId](const std::shared_ptr<Dealers::Dealer>& dealer) {
-                return dealer->dealer_id == newDealersId;
-            });
-        
-        if(dealersIt != dealers.end()) {
-            (*it)->dealer_id = newDealersId;
-            (*it)->dealer_id = newDealersId;
-            std::cout << "Dealer assigned successively!\n";
-        } else {
-            std::cout << "Invalid dealer ID. No dealer assigned.\n";
-        }
-    }
+                if(dealersIt != dealers.end()) {
+                        (*it)->dealerInfo.push_back(n);
+                        std::cout << "Dealer assigned successively!\n";
+                } else {
+                        std::cout << "\nInvalid dealer ID. No dealer assigned. ";
+                }
+		std::cout<<"\nWould you like to add another dealer (1 for Yes && 2 for No)? ";
+		std::cin>>dealerinput_option;
+		std::cin.ignore();
+        }else{
+		return;
+	}
+    }while(dealerinput_option ==1);
     
     int num_of_produce;
     std::cout << "Enter the number of produce categories you want to add: ";
