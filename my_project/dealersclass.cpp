@@ -835,14 +835,7 @@ bool Dealers::sendNotification(const std::string& receiver,const std::string& me
 	Notifications n;
 	n.id=generateUUID();
 	n.receiver=receiver;
-	auto currentDealerIt=std::find_if(dealers.begin(),dealers.end(),[this](const std::shared_ptr<Dealer>& dealer){
-			return dealer->current_data.dealer_id==this->current_data.dealer_id;
-		});
-	if(currentDealerIt!=dealers.end()){
-		n.sender=(*currentDealerIt)->current_data.current_user;
-	}else{
-		n.sender="Unkown";
-	}
+	n.sender=this->current_data.current_user;
 	n.message=message;
 	n.timestamp=std::time(nullptr);
 	n.is_read=false;

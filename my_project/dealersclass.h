@@ -266,10 +266,9 @@ class Dealers:public Farmers{
                                 
 		};
 		std::vector<std::shared_ptr<Dealer>>dealerslist;
-		Dealer current_data;
 	public:
 		Dealers();
-		
+		Dealer current_data;
 		void getDealersDetails();
 		static std::vector<std::shared_ptr<Dealers::Dealer>> readFromFile();
 		void displayDealersDetails(const std::function<std::vector<std::shared_ptr<Dealer>>()>& readFunction);
