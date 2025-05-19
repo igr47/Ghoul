@@ -265,7 +265,7 @@ void Farmers::addFarmProduce(const std::function<std::vector<std::shared_ptr<Far
     
     
     auto it = std::find_if(farmerslist.begin(), farmerslist.end(), 
-        [this](const std::shared_ptr<Farmer>& farmer) { 
+        [](const std::shared_ptr<Farmer>& farmer) { 
             return farmer->id == currentFarmer->id; 
         });
     

@@ -212,13 +212,10 @@ void Dealers::viewAvailableProduce(const std::function<std::vector<std::shared_p
 	if(!currentDealer){
 		std::cout<<"\nNo Dealer is currently logged in!!";
 	}
-        std::string  dealerId;
-        std::cout << "Enter your dealer id code: \n";
-        std::getline(std::cin, dealerId);
 
         auto dealers = readFromFile();
         auto it = std::find_if(dealers.begin(), dealers.end(),
-                              [this](const std::shared_ptr<Dealer>& dealer) {
+                              [](const std::shared_ptr<Dealer>& dealer) {
                                   return dealer->dealer_id == currentDealer->dealer_id;
                               });
         if (it == dealers.end()) {
@@ -229,8 +226,8 @@ void Dealers::viewAvailableProduce(const std::function<std::vector<std::shared_p
         auto farmers = readFunction();
         std::vector<std::shared_ptr<Farmers::Farmer>> associatedFarmers;
         std::copy_if(farmers.begin(), farmers.end(), std::back_inserter(associatedFarmers),
-                    [&dealerId](const std::shared_ptr<Farmers::Farmer>& farmer) {
-                        return farmer->dealer_id == dealerId;
+                    [](const std::shared_ptr<Farmers::Farmer>& farmer) {
+                        return farmer->dealer_id == currentDealer->dealer_id;
                     });
 
         if (associatedFarmers.empty()) {
@@ -270,7 +267,7 @@ void Dealers::purchaseFarmersProduce(const std::function<std::vector<std::shared
 
         auto dealers = readFunctions();
         auto dealerIt = std::find_if(dealers.begin(), dealers.end(),
-                                    [this](const std::shared_ptr<Dealer>& dealer) {
+                                    [](const std::shared_ptr<Dealer>& dealer) {
                                         return dealer->dealer_id == currentDealer->dealer_id;
                                     });
         if (dealerIt == dealers.end()) {
@@ -284,7 +281,7 @@ void Dealers::purchaseFarmersProduce(const std::function<std::vector<std::shared
 
         auto farmers = readFunction();
         auto farmerIt = std::find_if(farmers.begin(), farmers.end(),
-                                    [&farmerId, this](const std::shared_ptr<Farmers::Farmer>& farmer) {
+                                    [&farmerId](const std::shared_ptr<Farmers::Farmer>& farmer) {
                                         return farmer->id == farmerId && farmer->dealer_id == currentDealer->dealer_id;
                                     });
         if (farmerIt == farmers.end()) {
@@ -393,7 +390,7 @@ void Dealers::viewInventory(const std::function<std::vector<std::shared_ptr<Deal
         auto dealers = readFunction();
         
         auto it = std::find_if(dealers.begin(), dealers.end(),
-                              [this](const std::shared_ptr<Dealer>& dealer) {
+                              [](const std::shared_ptr<Dealer>& dealer) {
                                   return dealer->dealer_id == currentDealer->dealer_id;
                               });
         if (it == dealers.end()) {
@@ -434,7 +431,7 @@ void Dealers::viewTransactions(const std::function<std::vector<std::shared_ptr<D
         auto dealers = readFunction();
         
         auto it = std::find_if(dealers.begin(), dealers.end(),
-                              [this](const std::shared_ptr<Dealer>& dealer) {
+                              [](const std::shared_ptr<Dealer>& dealer) {
                                   return dealer->dealer_id == currentDealer->dealer_id;
                               });
         if (it == dealers.end()) {
@@ -566,7 +563,7 @@ void Dealers::processFarmersPayments(const std::function<std::vector<std::shared
         auto farmers = readFarmers();
 
         auto dealerIt = std::find_if(dealers.begin(), dealers.end(),
-            [this](const auto& d) { return d->dealer_id == currentDealer->dealer_id; });
+            [](const auto& d) { return d->dealer_id == currentDealer->dealer_id; });
 
         if (dealerIt == dealers.end()) {
             std::cout << "\nOoops! Sorry but you were not found in the database!\n";
