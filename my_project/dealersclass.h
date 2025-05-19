@@ -266,10 +266,13 @@ class Dealers:public Farmers{
                                 
 		};
 		std::vector<std::shared_ptr<Dealer>>dealerslist;
+	private:
+		static std::shared_ptr<Dealer>currentDealer;
 	public:
 		Dealers();
 		Dealer current_data;
 		void getDealersDetails();
+		static std::shared_ptr<Dealer> getCurrentDealer();
 		static std::vector<std::shared_ptr<Dealers::Dealer>> readFromFile();
 		void displayDealersDetails(const std::function<std::vector<std::shared_ptr<Dealer>>()>& readFunction);
 		void searchDealersDetails(const std::function<std::vector<std::shared_ptr<Dealer>>()>& radeFunction,const std::string& name);

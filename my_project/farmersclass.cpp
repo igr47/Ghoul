@@ -60,6 +60,8 @@ json Farmers::toJsonFarmers(const std::vector<std::shared_ptr<Farmer>>& farmers)
 	}
 	return farmersArray;
 }
+std::shared_ptr<Farmers::Farmer> Farmers::currentFarmer=nullptr;
+std::shared_ptr<Farmers::Farmer> Farmers::getCurrentFarmer(){return currentFarmer;}
 void Farmers::getFarmersDetails(){
 	farmerslist=readFromFile();
 	int num;
@@ -254,21 +256,21 @@ void Farmers::deleteFarmersDetails(const std::function<std::vector<std::shared_p
 	}
 }
 void Farmers::addFarmProduce(const std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction) {
-    // Load all farmers' data
+    if(!currentFarmer){
+	    std::cout<<"No farmer is currently logged in\n";
+	    return;
+	}
+
     farmerslist = readFunction();
     
-    std::string name;
-    std::cout << "Enter your farmer name: ";
-    std::getline(std::cin, name);
     
-    // Find the farmer
     auto it = std::find_if(farmerslist.begin(), farmerslist.end(), 
-        [&name](const std::shared_ptr<Farmer>& farmer) { 
-            return farmer->farmersname == name; 
+        [this](const std::shared_ptr<Farmer>& farmer) { 
+            return farmer->id == currentFarmer->id; 
         });
     
     if(it == farmerslist.end()) {
-        std::cout << "Farmer not found.\n";
+        std::cout << "LoggedIn farmer not found in the database.\n";
         return;
     }
     
@@ -422,15 +424,16 @@ bool Farmers::registerUser(const std::string& username,const std::string& email,
 }
 bool Farmers::loginUser(const std::string& username_or_email,const std::string& password,const std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction){
          auto farmers=readFunction();
-         for(const auto& item : farmers){
-                 auto userIt=std::find_if(item->user.begin(),item->user.end(),[&username_or_email](const auto& u){
+         for(const auto& farmer : farmers){
+                 auto userIt=std::find_if(farmer->user.begin(),farmer->user.end(),[&username_or_email](const auto& u){
                                  return u->username==username_or_email || u->email==username_or_email;
                                 });
-                 if(userIt==item->user.end()){
-                         return false;
+                 if(userIt !=farmer->user.end() && verify_password((*userIt)->hashed_password,password)){
+			 currentFarmer=farmer;
+                         return true;
                 }
-                return verify_password((*userIt)->hashed_password,password);
         }
+	return false;
 }
 void Farmers::displayMenu(){
         std::cout<<"\n=======Aunthentication System=========="

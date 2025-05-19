@@ -30,6 +30,8 @@ using json = nlohmann::json;
 
 // Default constructor
 Dealers::Dealers() {}
+std::shared_ptr<Dealers::Dealer> Dealers::currentDealer=nullptr;
+std::shared_ptr<Dealers::Dealer> Dealers::getCurrentDealer(){return currentDealer;}
 
 
 // JSON serialization for dealers
@@ -207,20 +209,20 @@ void Dealers::deleteDealersDetails(const std::function<std::vector<std::shared_p
 
 void Dealers::viewAvailableProduce(const std::function<std::vector<std::shared_ptr<Farmers::Farmer>>()> &readFunction) {
     try {
-        std::string name, dealerId;
-        std::cout << "Enter your dealer name: ";
-        std::cin.ignore();
-        std::getline(std::cin, name);
+	if(!currentDealer){
+		std::cout<<"\nNo Dealer is currently logged in!!";
+	}
+        std::string  dealerId;
         std::cout << "Enter your dealer id code: \n";
         std::getline(std::cin, dealerId);
 
         auto dealers = readFromFile();
         auto it = std::find_if(dealers.begin(), dealers.end(),
-                              [&name](const std::shared_ptr<Dealer>& dealer) {
-                                  return dealer->dealersname == name;
+                              [this](const std::shared_ptr<Dealer>& dealer) {
+                                  return dealer->dealer_id == currentDealer->dealer_id;
                               });
         if (it == dealers.end()) {
-            std::cout << "Dealer with name " << name << " was not found!\n";
+            std::cout << "LoggedIn dealer not found  in yhe database!\n";
             return;
         }
 
@@ -261,18 +263,18 @@ void Dealers::viewAvailableProduce(const std::function<std::vector<std::shared_p
 void Dealers::purchaseFarmersProduce(const std::function<std::vector<std::shared_ptr<Farmers::Farmer>>()> &readFunction,
                                     const std::function<std::vector<std::shared_ptr<Dealer>>()> &readFunctions) {
     try {
-        std::string dealerId;
-        std::cout << "Enter dealer ID: ";
-        std::cin.ignore();
-        std::getline(std::cin, dealerId);
+	if(!currentDealer){
+		std::cout<<"\nDaaler not logged in!!";
+		return;
+	}
 
         auto dealers = readFunctions();
         auto dealerIt = std::find_if(dealers.begin(), dealers.end(),
-                                    [&dealerId](const std::shared_ptr<Dealer>& dealer) {
-                                        return dealer->dealer_id == dealerId;
+                                    [this](const std::shared_ptr<Dealer>& dealer) {
+                                        return dealer->dealer_id == currentDealer->dealer_id;
                                     });
         if (dealerIt == dealers.end()) {
-            std::cout << "Dealer with ID '" << dealerId << "' not found.\n";
+            std::cout << "LoggedIn dealer not found in the database.\n";
             return;
         }
 
@@ -282,8 +284,8 @@ void Dealers::purchaseFarmersProduce(const std::function<std::vector<std::shared
 
         auto farmers = readFunction();
         auto farmerIt = std::find_if(farmers.begin(), farmers.end(),
-                                    [&farmerId, &dealerId](const std::shared_ptr<Farmers::Farmer>& farmer) {
-                                        return farmer->id == farmerId && farmer->dealer_id == dealerId;
+                                    [&farmerId, this](const std::shared_ptr<Farmers::Farmer>& farmer) {
+                                        return farmer->id == farmerId && farmer->dealer_id == currentDealer->dealer_id;
                                     });
         if (farmerIt == farmers.end()) {
             std::cout << "Farmer not found or not registered under your dealership!\n";
@@ -384,17 +386,18 @@ void Dealers::processProducePurchase(Farmers::Farmer& farmer, Dealer& dealer, co
 
 void Dealers::viewInventory(const std::function<std::vector<std::shared_ptr<Dealer>>()> &readFunction) {
     try {
+	if(!currentDealer){
+		std::cout<<"\nYou are not logged in!!";
+		return;
+	}
         auto dealers = readFunction();
-        std::string dealerName;
-        std::cout << "Enter dealer name to view inventory: ";
-        std::getline(std::cin, dealerName);
-
+        
         auto it = std::find_if(dealers.begin(), dealers.end(),
-                              [&dealerName](const std::shared_ptr<Dealer>& dealer) {
-                                  return dealer->dealersname == dealerName;
+                              [this](const std::shared_ptr<Dealer>& dealer) {
+                                  return dealer->dealer_id == currentDealer->dealer_id;
                               });
         if (it == dealers.end()) {
-            std::cout << "Dealer not found!\n";
+            std::cout << "LoggedIn user not found in the database\n";
             return;
         }
 
@@ -424,17 +427,18 @@ void Dealers::viewInventory(const std::function<std::vector<std::shared_ptr<Deal
 
 void Dealers::viewTransactions(const std::function<std::vector<std::shared_ptr<Dealer>>()> &readFunction) {
     try {
+	if(!currentDealer){
+		std::cout<<"\nOoops! Sorry but you are not logged in!!";
+		return;
+	}
         auto dealers = readFunction();
-        std::string dealerName;
-        std::cout << "\nEnter dealer name to view transactions: ";
-        std::getline(std::cin, dealerName);
-
+        
         auto it = std::find_if(dealers.begin(), dealers.end(),
-                              [&dealerName](const std::shared_ptr<Dealer>& dealer) {
-                                  return dealer->dealersname == dealerName;
+                              [this](const std::shared_ptr<Dealer>& dealer) {
+                                  return dealer->dealer_id == currentDealer->dealer_id;
                               });
         if (it == dealers.end()) {
-            std::cout << "Dealer not found!\n";
+            std::cout << "\nOoops! Sorry but you are not found  in the database!\n";
             return;
         }
 
@@ -553,20 +557,19 @@ void Dealers::searchFarmers(const std::function<std::vector<Farmers::Farmer>()> 
 void Dealers::processFarmersPayments(const std::function<std::vector<std::shared_ptr<Farmers::Farmer>>()>& readFarmers,const std::function<std::vector<std::shared_ptr<Dealer>>()>& readDealers)
 {
     try {
+	if(!currentDealer){
+		std::cout<<"\nOoops! Sorry but you are not loggedIn";
+		return;
+	}
         
         auto dealers = readDealers();
         auto farmers = readFarmers();
 
-        
-        std::string dealerId;
-        std::cout << "\nEnter dealer ID: ";
-        std::getline(std::cin, dealerId);
-
         auto dealerIt = std::find_if(dealers.begin(), dealers.end(),
-            [&dealerId](const auto& d) { return d->dealer_id == dealerId; });
+            [this](const auto& d) { return d->dealer_id == currentDealer->dealer_id; });
 
         if (dealerIt == dealers.end()) {
-            std::cout << "Dealer not found!\n";
+            std::cout << "\nOoops! Sorry but you were not found in the database!\n";
             return;
         }
 
@@ -646,7 +649,7 @@ void Dealers::processFarmersPayments(const std::function<std::vector<std::shared
         newRecord.totalAmount = 0.0;
 
         for (auto& farmer : farmers) {
-            if (farmer->dealer_id == dealerId) {
+            if (farmer->dealer_id == this->current_data.dealer_id) {
                 std::vector<FarmerPayment> farmerPayments;
 
                 for (const auto& item : dealer.inventory) {
@@ -761,15 +764,16 @@ bool Dealers::registerUser(const std::string& username,const std::string& email,
 }
 bool Dealers::loginUser(const std::string& username_or_email,const std::string& password,const std::function<std::vector<std::shared_ptr<Dealer>>()>& readFunction){
 	 auto dealers=readFunction();
-	 for(const auto& item : dealers){
-		 auto userIt=std::find_if(item->user.begin(),item->user.end(),[&username_or_email](const auto& u){
+	 for(const auto& dealer : dealers){
+		 auto userIt=std::find_if(dealer->user.begin(),dealer->user.end(),[&username_or_email](const auto& u){
 				 return u->username==username_or_email || u->email==username_or_email;
 				});
-		 if(userIt==item->user.end()){
-			 return false;
+		 if(userIt !=dealer->user.end() && verify_password((*userIt)->hashed_password,password)){
+			currentDealer=dealer;
+			return true;
 		}
-		return verify_password((*userIt)->hashed_password,password);
 	}
+	return false;
 }
 void Dealers::displayMenu(){
 	std::cout<<"\n=======Aunthentication System=========="

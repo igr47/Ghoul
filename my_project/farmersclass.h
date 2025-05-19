@@ -162,6 +162,8 @@ class Farmers:public Base{
                 }
 		};
 		std::vector<std::shared_ptr<Farmer>>farmerslist;
+	private:
+		static std::shared_ptr<Farmer>currentFarmer;
 	public:
 		Farmers();
 		void getFarmersDetails();
@@ -169,6 +171,7 @@ class Farmers:public Base{
 		void displayFarmersDetails(const std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction);
 		void searchFarmersDetails(const std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction,const  std::string& name);
 		void updateFarmersDetails(const std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction);
+		static std::shared_ptr<Farmer> getCurrentFarmer();
 		void deleteFarmersDetails(const std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction);
 		void addFarmProduce(const std::function<std::vector<std::shared_ptr<Farmer>>()>& readFunction);
 		json toJsonFarmers(const std::vector<std::shared_ptr<Farmer>>& farmers) const;
