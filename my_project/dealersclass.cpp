@@ -227,7 +227,7 @@ void Dealers::viewAvailableProduce(const std::function<std::vector<std::shared_p
         std::vector<std::shared_ptr<Farmers::Farmer>> associatedFarmers;
         std::copy_if(farmers.begin(), farmers.end(), std::back_inserter(associatedFarmers),
                     [](const std::shared_ptr<Farmers::Farmer>& farmer) {
-                        return std::any_of(farmer->dealerInfo.begin(),farmer-dealerInfo.end()[&currentDealer](const Farmers::DealerInfo& dealerInfi){
+                        return std::any_of(farmer->dealerInfo.begin(),farmer->dealerInfo.end(),[](const Farmers::DealerInfo& dealerInfo){
 					return dealerInfo.dealer_id==currentDealer->dealer_id;
 				});
                     });
@@ -284,7 +284,9 @@ void Dealers::purchaseFarmersProduce(const std::function<std::vector<std::shared
         auto farmers = readFunction();
         auto farmerIt = std::find_if(farmers.begin(), farmers.end(),
                                     [&farmerId](const std::shared_ptr<Farmers::Farmer>& farmer) {
-                                        return farmer->id == farmerId && farmer->dealer_id == currentDealer->dealer_id;
+                                        return std::any_of(farmer->dealerInfo.begin(),farmer->dealerInfo.end(),[&farmerId,&farmer](const Farmers::DealerInfo& dealerInfo){
+							return farmer->id==farmerId && dealerInfo.dealer_id==currentDealer->dealer_id;
+						});
                                     });
         if (farmerIt == farmers.end()) {
             std::cout << "Farmer not found or not registered under your dealership!\n";
@@ -541,7 +543,15 @@ void Dealers::searchFarmers(const std::function<std::vector<Farmers::Farmer>()> 
                     std::cout << produce.label << " (" << produce.quantities->size() << " entries)";
                     firstProduce = false;
                 }
-                std::cout << "\nDealer: " << (farmer.dealer_id.empty() ? "None" : farmer.dealer_id) << "\n";
+                std::cout << "\nDealer(s): " ;
+		if (farmer.dealerInfo.empty()){
+				std::cout<<"\nNone";
+		}else{
+			 for(const auto& dealer : farmer.dealerInfo){
+				std::cout<<dealer.dealerName <<"\n";
+		}
+		}
+		
                 std::cout << "----------------------------------------\n";
             }
         }
@@ -648,7 +658,8 @@ void Dealers::processFarmersPayments(const std::function<std::vector<std::shared
         newRecord.totalAmount = 0.0;
 
         for (auto& farmer : farmers) {
-            if (farmer->dealer_id == this->current_data.dealer_id) {
+            if (std::any_of(farmer->dealerInfo.begin(),farmer->dealerInfo.end(),[this](const auto& dealerInfo){
+				    return dealerInfo.dealer_id==this->current_data.dealer_id;})) {
                 std::vector<FarmerPayment> farmerPayments;
 
                 for (const auto& item : dealer.inventory) {
@@ -860,7 +871,9 @@ void Dealers::sendNotifications(const std::function<std::vector<std::shared_ptr<
 	std::vector<std::shared_ptr<Farmers::Farmer>> matchingFarmers;
 	for(const auto& farmer :farmers){
 		auto dealerIt=std::find_if(dealers.begin(),dealers.end(),[&farmer](const std::shared_ptr<Dealer>& dealer){
-				return farmer->dealer_id==dealer->dealer_id;
+				return std::any_of(farmer->dealerInfo.begin(),farmer->dealerInfo.end(),[&dealer](const Farmers::DealerInfo& dealerInfo){
+						return dealerInfo.dealer_id==currentDealer->dealer_id;
+					});
 			});
 		if(dealerIt!=dealers.end()){
 			matchingFarmers.push_back(farmer);

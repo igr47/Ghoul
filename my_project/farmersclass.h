@@ -63,9 +63,9 @@ class Farmers:public Base{
 			}
 			void fromJson(const json& j){
 				dealerName=j.value("My_Dealers_Name","");
-				dealer_id=j.value("My_Dealers_Id,"");
+				dealer_id=j.value("My_Dealers_Id","");
 			}
-		}
+		};
 
 		struct Farmer{
 		        std::string farmersname;
@@ -98,7 +98,7 @@ class Farmers:public Base{
                     
                                         produceArray.push_back(item.toJson());
                                 }
-				json dealerinfoArray = json::Array();
+				json dealerinfoArray = json::array();
 				for (const auto& item : dealerInfo){
 					dealerinfoArray.push_back(item.toJson());
 				}

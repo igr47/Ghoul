@@ -162,15 +162,20 @@ void Farmers::displayFarmersDetails(const std::function<std::vector<std::shared_
                           << "Average Produce: " << farmer->averageproduce << "\n";
             }
             
-            if (farmer->dealer_id.empty()) {
+            if (farmer->dealerInfo.empty()) {
                 std::cout << "Dealer: None\n";
             }else{
 		    auto dealers=Dealers::readFromFile();
-		    auto dealerIt=std::find_if(dealers.begin(),dealers.end(),[&](const auto& d){return d->dealer_id==farmer->dealer_id;});
+		    auto dealerIt=std::find_if(dealers.begin(),dealers.end(),[&farmer](const auto& d){return std::any_of(farmer->dealerInfo.begin(),farmer->dealerInfo.end(),[&d](const auto& dealerInfo){
+					    return dealerInfo.dealer_id==d->dealer_id;
+					});
+				});
 		    if(dealerIt !=dealers.end()){
 			    std::cout<<"Dealer: " << (*dealerIt)->dealersname<<"\n";
 		    }else{
-			std::cout<<"Dealer: [ID: "<<farmer->dealer_id<< "- Not Found]\n";
+			for(const auto& d : farmer->dealerInfo){
+			                std::cout<<"Dealer: [ID: "<<d.dealer_id<< "- Not Found]\n";
+			}
 		   }
 	    }
 
@@ -299,7 +304,7 @@ void Farmers::addFarmProduce(const std::function<std::vector<std::shared_ptr<Far
 		n.dealer_id=newDealersId;
         
                 auto dealersIt = std::find_if(dealers.begin(), dealers.end(),
-                                [&newDealersId,&newDealersId](const std::shared_ptr<Dealers::Dealer>& dealer) {
+                                [&newDealersId,&newDealersName](const std::shared_ptr<Dealers::Dealer>& dealer) {
                                                 return dealer->dealer_id == newDealersId &&  dealer->dealersname==newDealersName;
                         });
         
